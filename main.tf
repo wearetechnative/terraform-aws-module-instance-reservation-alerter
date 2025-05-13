@@ -6,7 +6,7 @@ locals {
 module "instance_reservation_alerter" {
 
   source = "github.com/wearetechnative/terraform-aws-lambda.git?ref=66c495f917207c64c67fe15ef2141483bc3a567c"
-    
+
   name              = local.lambda_instance_reservation_alerter_function_name
   role_arn          = module.instance_reservation_alerter_lambda_role.role_arn
   role_arn_provided = true
@@ -64,7 +64,7 @@ module "instance_reservation_alerter_lambda_role" {
 
   role_name = "lambda_instance_reservation_alerter_lambda_role"
 
-  aws_managed_policies      = []
+  aws_managed_policies = []
   customer_managed_policies = {
     "sqs_observability_receiver" : jsondecode(data.aws_iam_policy_document.sqs_observability_receiver.json)
     "allow_sns_publish" : jsondecode(data.aws_iam_policy_document.allow_sns_publish.json)
@@ -100,11 +100,11 @@ data "aws_iam_policy_document" "read_reservations" {
   statement {
     sid = "DescribeReservations"
 
-    actions = [ "rds:DescribeReservedDBInstances",
-              	"ec2:DescribeHostReservations",
-                "ec2:DescribeReservedInstances",
-				        "ec2:DescribeCapacityReservations",
-                "redshift:DescribeReservedNodes"]
+    actions = ["rds:DescribeReservedDBInstances",
+      "ec2:DescribeHostReservations",
+      "ec2:DescribeReservedInstances",
+      "ec2:DescribeCapacityReservations",
+    "redshift:DescribeReservedNodes"]
 
     resources = ["*"]
   }
