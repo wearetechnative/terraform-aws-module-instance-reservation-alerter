@@ -175,11 +175,11 @@ def lambda_handler(event, context):
         else:
             for endpoint in notification_endpoints:
                 if endpoint.startswith("https://sqs"):
+                    print(f'Processing SQS endpoint {endpoint}')
                     publish_sqs_message(reservation_details, current_date, account_id, client_name, account_name, endpoint)
-                    print("Message sent to SQS")
                 elif endpoint.startswith("arn:aws:sns"):
+                    print(f'Processing SNS endpoint {endpoint}')
                     publish_sns_message(reservation_details, current_date, account_id, account_name, endpoint)
-                    print("Message sent to SNS")
 
         return {
                 "statusCode": 200,

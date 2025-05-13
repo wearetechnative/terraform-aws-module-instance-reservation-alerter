@@ -3,7 +3,7 @@ locals {
 }
 
 
-module "instace_reservation_alerter" {
+module "instance_reservation_alerter" {
 
   source = "github.com/wearetechnative/terraform-aws-lambda.git?ref=66c495f917207c64c67fe15ef2141483bc3a567c"
     
@@ -29,24 +29,34 @@ module "instace_reservation_alerter" {
   }
 }
 
-# resource "aws_cloudwatch_event_target" "lambda_target" {
-#   rule           = aws_cloudwatch_event_rule.refresh_alarms.id
-#   event_bus_name = aws_cloudwatch_event_rule.refresh_alarms.event_bus_name
+# Cron job event rule directly tied to lambda function.
+resource "aws_cloudwatch_event_rule" "refresh_reservation_alerter" {
+  name        = "trigger-reservation-alerter-rule"
+  description = "Trigger reservation alerter lambda every 24 hours."
 
-#   arn = module.instace_reservation_alerter.lambda_function_arn
+  state               = "ENABLED"
+  event_bus_name      = "default"
+  schedule_expression = "rate(24 hours)"
+}
 
-#   dead_letter_config {
-#     arn = var.sqs_dlq_arn
-#   }
-# }
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule           = aws_cloudwatch_event_rule.refresh_reservation_alerter.id
+  event_bus_name = aws_cloudwatch_event_rule.refresh_reservation_alerter.event_bus_name
 
-# resource "aws_lambda_permission" "allow_eventbridge" {
-#   statement_id_prefix = module.instace_reservation_alerter.lambda_function_name
-#   action              = "lambda:InvokeFunction"
-#   function_name       = module.instace_reservation_alerter.lambda_function_name
-#   principal           = "events.amazonaws.com"
-#   source_arn          = aws_cloudwatch_event_rule.refresh_alarms.arn
-# }
+  arn = module.instance_reservation_alerter.lambda_function_arn
+
+  dead_letter_config {
+    arn = var.sqs_dlq_arn
+  }
+}
+
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id_prefix = module.instance_reservation_alerter.lambda_function_name
+  action              = "lambda:InvokeFunction"
+  function_name       = module.instance_reservation_alerter.lambda_function_name
+  principal           = "events.amazonaws.com"
+  source_arn          = aws_cloudwatch_event_rule.refresh_reservation_alerter.arn
+}
 
 module "instance_reservation_alerter_lambda_role" {
 
