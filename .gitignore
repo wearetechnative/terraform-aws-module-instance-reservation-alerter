@@ -29,3 +29,7 @@ override.tf.json
 # example: *tfplan*
 .temp.html 
 .temp.seed
+
+# Python env files
+myenv
+**/__pycache__*
