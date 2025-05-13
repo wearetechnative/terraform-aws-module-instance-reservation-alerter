@@ -9,7 +9,7 @@ rds_client      = boto3.client('rds')
 redshift_client = boto3.client('redshift')
 ec2_client      = boto3.client('ec2')
 sns_client      = boto3.client('sns')
-sts_client      = boto3.client('stss')
+sts_client      = boto3.client('sts')
 sqs_client      = boto3.client('sqs')
 
 client_name           = os.environ['CLIENT_NAME']
@@ -17,8 +17,9 @@ account_name          = os.environ['ACCOUNT_NAME']
 notification_endpoint = os.environ['NOTIFICATION_ENDPOINT']
 
 def get_reserved_instances():
+
     # Get reservations
-    
+
     reservations_dict = {'Reservations': []}
 
     rds_response      = rds_client.describe_reserved_db_instances()
@@ -69,10 +70,11 @@ def get_reserved_instances():
                 }]
             )
 
-
     return reservations_dict
 
 def publish_sns_message(reservations, current_date, account_id, account_name, notification_endpoint):
+
+    results = []
 
     for reservation in reservations['Reservations']:
 
@@ -84,8 +86,8 @@ def publish_sns_message(reservations, current_date, account_id, account_name, no
         elif time_left == 1:
             priority = "P1"
         else:
-            print(f'{reservation["service"]} Reservation expiring in {time_left.days} days.')
-            exit()
+            print(f'{reservation["service"]} {reservation["node_type"]} Reservation expiring in {time_left.days} days - No alert sent.')
+            continue
 
         sns_client.publish(
             TopicArn= notification_endpoint,
@@ -119,8 +121,8 @@ def publish_sqs_message(reservations, current_date, account_id, client_name, acc
         elif time_left == 1:
             priority = "P1"
         else:
-            print(f'{reservation["service"]} Reservation expiring in {time_left.days} days.')
-            exit()
+            print(f'{reservation["service"]} {reservation["node_type"]} Reservation expiring in {time_left.days} days - No alert sent.')
+            continue
 
         message = {
             'direct_message': True,
@@ -150,10 +152,10 @@ resulting in potential cost increase.
         # Message must be string to be forwarded or else you will get a type error.
         message_json = json.dumps(message)
 
-        return sqs_client.send_message(
+        sqs_client.send_message(
                 QueueUrl=notification_endpoint,
                 MessageBody=message_json,
-            )
+        )
 
 
 def lambda_handler(event, context):
@@ -164,10 +166,23 @@ def lambda_handler(event, context):
 
         reservation_details = get_reserved_instances()
 
-        if notification_endpoint.startswith("https://sqs"):
-            publish_sqs_message(reservation_details, current_date, account_id, client_name, account_name, notification_endpoint)
-        elif notification_endpoint.startswith("arn:aws:sns"):
-            publish_sns_message(reservation_details, current_date, account_id, account_name, notification_endpoint)
+        if not reservation_details["Reservations"]:
+            # print("No Reservations available.")
+            return {
+                "statusCode": 200,
+                "message": "No Reservations available."
+            }
+        else:
+            if notification_endpoint.startswith("https://sqs"):
+                publish_sqs_message(reservation_details, current_date, account_id, client_name, account_name, notification_endpoint)
+            elif notification_endpoint.startswith("arn:aws:sns"):
+                publish_sns_message(reservation_details, current_date, account_id, account_name, notification_endpoint)
+
+        return {
+                "statusCode": 200,
+                "message": "Reservations has been processed."
+            }
+        
     except Exception as e:
         error_traceback = traceback.format_exc()
 
@@ -177,4 +192,5 @@ def lambda_handler(event, context):
             }
         
         print(exception_message)
+
         raise

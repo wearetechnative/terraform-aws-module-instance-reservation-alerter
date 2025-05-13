@@ -13,7 +13,7 @@ module "instace_reservation_alerter" {
 
   handler                   = "lambda_function.lambda_handler"
   source_type               = "local"
-  source_directory_location = "${path.module}/lambda_instace_reservation_alerter"
+  source_directory_location = "${path.module}/lambda_instance_reservation_alerter"
   source_file_name          = null
 
   kms_key_arn = var.kms_key_arn
@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "sqs_observability_receiver" {
 
     actions = ["sqs:SendMessage"]
 
-    resources = [var.master_observability_receiver_sqs_arn]
+    resources = [var.tn_master_observability_receiver_sqs_arn]
   }
 }
 
@@ -92,6 +92,7 @@ data "aws_iam_policy_document" "read_reservations" {
 
     actions = [ "rds:DescribeReservedDBInstances",
               	"ec2:DescribeHostReservations",
+                "ec2:DescribeReservedInstances",
 				        "ec2:DescribeCapacityReservations",
                 "redshift:DescribeReservedNodes"]
 
