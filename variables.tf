@@ -22,7 +22,7 @@ variable "client_name" {
 }
 
 variable "account_name" {
-  description = "Name of the Client"
+  description = "Name of the account."
   default     = "Unknown"
 }
 

@@ -29,6 +29,25 @@ module "instace_reservation_alerter" {
   }
 }
 
+# resource "aws_cloudwatch_event_target" "lambda_target" {
+#   rule           = aws_cloudwatch_event_rule.refresh_alarms.id
+#   event_bus_name = aws_cloudwatch_event_rule.refresh_alarms.event_bus_name
+
+#   arn = module.instace_reservation_alerter.lambda_function_arn
+
+#   dead_letter_config {
+#     arn = var.sqs_dlq_arn
+#   }
+# }
+
+# resource "aws_lambda_permission" "allow_eventbridge" {
+#   statement_id_prefix = module.instace_reservation_alerter.lambda_function_name
+#   action              = "lambda:InvokeFunction"
+#   function_name       = module.instace_reservation_alerter.lambda_function_name
+#   principal           = "events.amazonaws.com"
+#   source_arn          = aws_cloudwatch_event_rule.refresh_alarms.arn
+# }
+
 module "instance_reservation_alerter_lambda_role" {
 
   source = "github.com/wearetechnative/terraform-aws-iam-role.git?ref=9229bbd0280807cbc49f194ff6d2741265dc108a"

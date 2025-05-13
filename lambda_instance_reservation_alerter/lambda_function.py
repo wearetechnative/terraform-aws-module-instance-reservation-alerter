@@ -97,7 +97,7 @@ Service: {reservation["service"]}
 Reservation ID: {reservation["reservation_id"]}
 Instance Type: {reservation["node_type"]}
 Days Remaining: {time_left.days}
-Expiration Date: {(now + time_left).strftime('%Y-%m-%d')}
+Expiration Date: {(current_date + time_left).strftime('%Y-%m-%d')}
 AWS Account ID: {account_id}
 AWS Account Name: {account_name}
 
@@ -132,7 +132,7 @@ Service: {reservation["service"]}
 Reservation ID: {reservation["reservation_id"]}
 Instance Type: {reservation["node_type"]}
 Days Remaining: {time_left.days}
-Expiration Date: {(now + time_left).strftime('%Y-%m-%d')}
+Expiration Date: {(current_date + time_left).strftime('%Y-%m-%d')}
 
 ACTION REQUIRED:
 This reserved instance will convert to on-demand pricing after expiration, 
