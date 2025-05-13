@@ -12,9 +12,9 @@ sns_client      = boto3.client('sns')
 sts_client      = boto3.client('sts')
 sqs_client      = boto3.client('sqs')
 
-client_name           = os.environ['CLIENT_NAME']
-account_name          = os.environ['ACCOUNT_NAME']
-notification_endpoint = os.environ['NOTIFICATION_ENDPOINT']
+client_name            = os.environ['CLIENT_NAME']
+account_name           = os.environ['ACCOUNT_NAME']
+notification_endpoints = json.loads(os.environ['NOTIFICATION_ENDPOINTS'])
 
 def get_reserved_instances():
 
@@ -81,9 +81,9 @@ def publish_sns_message(reservations, current_date, account_id, account_name, no
         # Calculate how many days left.
         time_left = current_date - reservation['start_time']
 
-        if time_left == 7:
+        if time_left.days == 7:
             priority = "P2"
-        elif time_left == 1:
+        elif time_left.days == 1:
             priority = "P1"
         else:
             print(f'{reservation["service"]} {reservation["node_type"]} Reservation expiring in {time_left.days} days - No alert sent.')
@@ -116,9 +116,9 @@ def publish_sqs_message(reservations, current_date, account_id, client_name, acc
         # Calculate how many days left.
         time_left = current_date - reservation['start_time']
 
-        if time_left == 7:
+        if time_left.days == 7:
             priority = "P2"
-        elif time_left == 1:
+        elif time_left.days == 1:
             priority = "P1"
         else:
             print(f'{reservation["service"]} {reservation["node_type"]} Reservation expiring in {time_left.days} days - No alert sent.')
@@ -173,10 +173,13 @@ def lambda_handler(event, context):
                 "message": "No Reservations available."
             }
         else:
-            if notification_endpoint.startswith("https://sqs"):
-                publish_sqs_message(reservation_details, current_date, account_id, client_name, account_name, notification_endpoint)
-            elif notification_endpoint.startswith("arn:aws:sns"):
-                publish_sns_message(reservation_details, current_date, account_id, account_name, notification_endpoint)
+            for endpoint in notification_endpoints:
+                if endpoint.startswith("https://sqs"):
+                    publish_sqs_message(reservation_details, current_date, account_id, client_name, account_name, endpoint)
+                    print("Message sent to SQS")
+                elif endpoint.startswith("arn:aws:sns"):
+                    publish_sns_message(reservation_details, current_date, account_id, account_name, endpoint)
+                    print("Message sent to SNS")
 
         return {
                 "statusCode": 200,

@@ -23,9 +23,9 @@ module "instace_reservation_alerter" {
   runtime     = "python3.9"
 
   environment_variables = {
-    CLIENT_NAME           = var.client_name
-    ACCOUNT_NAME          = var.account_name
-    NOTIFICATION_ENDPOINT = var.notification_endpoint
+    CLIENT_NAME            = var.client_name
+    ACCOUNT_NAME           = var.account_name
+    NOTIFICATION_ENDPOINTS = jsonencode(var.notification_endpoints)
   }
 }
 

@@ -26,7 +26,7 @@ variable "account_name" {
   default     = "Unknown"
 }
 
-variable "notification_endpoint" {
-  description = "Can be a SNS topic ARN or SQS queue URL."
-  type        = string
+variable "notification_endpoints" {
+  description = "List of SNS topic ARN or SQS queue URL."
+  type        = list(string)
 }
