@@ -4,7 +4,8 @@ locals {
 
 
 module "instace_reservation_alerter" {
-    source = "github.com/wearetechnative/terraform-aws-lambda.git?ref=66c495f917207c64c67fe15ef2141483bc3a567c"
+
+  source = "github.com/wearetechnative/terraform-aws-lambda.git?ref=66c495f917207c64c67fe15ef2141483bc3a567c"
     
   name              = local.lambda_instance_reservation_alerter_function_name
   role_arn          = module.instance_reservation_alerter_lambda_role.role_arn
@@ -22,18 +23,23 @@ module "instace_reservation_alerter" {
   runtime     = "python3.9"
 
   environment_variables = {
-    
+    CLIENT_NAME           = var.client_name
+    ACCOUNT_NAME          = var.account_name
+    NOTIFICATION_ENDPOINT = var.notification_endpoint
   }
 }
 
 module "instance_reservation_alerter_lambda_role" {
+
   source = "github.com/wearetechnative/terraform-aws-iam-role.git?ref=9229bbd0280807cbc49f194ff6d2741265dc108a"
 
   role_name = "lambda_instance_reservation_alerter_lambda_role"
 
-  aws_managed_policies = []
+  aws_managed_policies      = []
   customer_managed_policies = {
     "sqs_observability_receiver" : jsondecode(data.aws_iam_policy_document.sqs_observability_receiver.json)
+    "allow_sns_publish" : jsondecode(data.aws_iam_policy_document.allow_sns_publish.json)
+    "read_reservations" : jsondecode(data.aws_iam_policy_document.read_reservations.json)
   }
 
   trust_relationship = {
@@ -41,11 +47,34 @@ module "instance_reservation_alerter_lambda_role" {
   }
 }
 
-data "aws_iam_policy_document" "example" {
+data "aws_iam_policy_document" "sqs_observability_receiver" {
   statement {
-    sid = "example"
+    sid = "SQSObservabilityReceiver"
 
-    actions = ["example:example"]
+    actions = ["sqs:SendMessage"]
+
+    resources = [var.master_observability_receiver_sqs_arn]
+  }
+}
+
+data "aws_iam_policy_document" "allow_sns_publish" {
+  statement {
+    sid = "AllowSNSPublish"
+
+    actions = ["sns:Publish"]
+
+    resources = ["arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+  }
+}
+
+data "aws_iam_policy_document" "read_reservations" {
+  statement {
+    sid = "DescribeReservations"
+
+    actions = [ "rds:DescribeReservedDBInstances",
+              	"ec2:DescribeHostReservations",
+				        "ec2:DescribeCapacityReservations",
+                "redshift:DescribeReservedNodes"]
 
     resources = ["*"]
   }
