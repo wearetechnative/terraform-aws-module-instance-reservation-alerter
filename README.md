@@ -1,4 +1,4 @@
-# Terraform AWS Instance Reservation Alerter ![](https://img.shields.io/github/workflow/status/TechNative-B-V/terraform-aws-module-name/tflint.yaml?style=plastic)
+# Terraform AWS Instance Reservation Alerter ![](https://img.shields.io/github/workflow/status/wearetechnative/terraform-aws-module-instance-reservation-alerter/tflint.yaml?style=plastic)
 
 <!-- SHIELDS -->
 
