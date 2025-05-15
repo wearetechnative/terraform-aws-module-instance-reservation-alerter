@@ -1,6 +1,9 @@
 # Terraform AWS instance reservation alerter ![](https://img.shields.io/github/actions/workflow/status/wearetechnative/terraform-aws-module-instance-reservation-alerter/tflint.yaml?style=plastic)
 
+![](https://img.shields.io/github/actions/workflow/status/wearetechnative/terraform-aws-module-instance-reservation-alerter/tflint.yaml?style=plastic)
+
 <!-- SHIELDS -->
+
 
 This module implements a lambda that monitors AWS reserved instances every 24 hours across multiple services and alerts when they're about to expire.
 The Lambda prevents unexpected cost increases by alerting teams when reserved instances are nearing expiration, allowing time to renew or adjust resources.
