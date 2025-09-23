@@ -20,7 +20,7 @@ module "instance_reservation_alerter" {
   sqs_dlq_arn = var.sqs_dlq_arn
   memory_size = 128
   timeout     = 300
-  runtime     = "python3.9"
+  runtime     = "python3.13"
 
   environment_variables = {
     CLIENT_NAME            = var.client_name
