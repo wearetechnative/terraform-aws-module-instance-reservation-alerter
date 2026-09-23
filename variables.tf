@@ -18,11 +18,13 @@ variable "kms_key_arn" {
 
 variable "client_name" {
   description = "Name of the Client"
+  type        = string
   default     = "Technative_LandingZone"
 }
 
 variable "account_name" {
   description = "Name of the account."
+  type        = string
   default     = "Unknown"
 }
 
